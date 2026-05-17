@@ -13,9 +13,28 @@ const jwtPassword = 'secret';
  *                        Returns null if the username is not a valid email or
  *                        the password does not meet the length requirement.
  */
+
+const zod = require('zod');
+const emailSchema = zod.string().email();
+const passSchema = zod.string().min(6);
+
 function signJwt(username, password) {
-    // Your code here
+    const usernameResponse = emailSchema.safeParse(username);
+    const passwordResponse = passSchema.safeParse(password);
+
+    if(!usernameResponse.success || !passwordResponse.success){
+        return null;
+    }
+
+    const signature = jwt.sign({
+        username
+    }, jwtPassword)
+
+    return signature;
 }
+
+// const ans = signJwt(adi@gmail, 12);
+// console.log(ans);
 
 /**
  * Verifies a JWT using a secret key.
@@ -26,8 +45,17 @@ function signJwt(username, password) {
  *                    using the secret key.
  */
 function verifyJwt(token) {
-    // Your code here
+    let ans = true;
+   try {
+        jwt.verify(token, jwtPassword); //  either return verified string or throws an exception
+   } catch (e) {
+     ans =  false;
+   }
+   return ans;
+   
 }
+const ans = verifyJwt("asadsad");
+console.log(ans);
 
 /**
  * Decodes a JWT to reveal its payload without verifying its authenticity.
@@ -37,9 +65,14 @@ function verifyJwt(token) {
  *                         Returns false if the token is not a valid JWT format.
  */
 function decodeJwt(token) {
-    // Your code here
+    const decoded = jwt.decode(token); // no secret needed for decoding // decoded return either decoded string or null
+    if(decoded){
+        return true;
+    }else{
+        return false;
+    }
 }
-
+//console.log(decodeJwt("asddasd")); // return false and correct then return true that means it can be decoded
 
 module.exports = {
   signJwt,
